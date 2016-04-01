@@ -1,8 +1,9 @@
 class MoviesController < ApplicationController
 
   def show
-    id = params[:id] # retrieve movie ID from URI route
-    @movie = Movie.find(id) # look up movie by unique ID
+    @id = params[:id] # retrieve movie ID from URI route
+    @movie = Movie.find(@id) # look up movie by unique ID
+    @director = @movie.director
     # will render app/views/movies/show.<extension> by default
   end
 
@@ -16,21 +17,15 @@ class MoviesController < ApplicationController
     end
     @all_ratings = Movie.all_ratings
     @selected_ratings = params[:ratings] || session[:ratings] || {}
-    
-    if @selected_ratings == {}
-      @selected_ratings = Hash[@all_ratings.map {|rating| [rating, rating]}]
-    end
-    
+
     if params[:sort] != session[:sort]
       session[:sort] = sort
-      flash.keep
       redirect_to :sort => sort, :ratings => @selected_ratings and return
     end
 
     if params[:ratings] != session[:ratings] and @selected_ratings != {}
       session[:sort] = sort
       session[:ratings] = @selected_ratings
-      flash.keep
       redirect_to :sort => sort, :ratings => @selected_ratings and return
     end
     @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
@@ -62,6 +57,18 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+  
+  def similar
+    @id = params[:movie_id]
+    @movie = Movie.find(@id)
+    @director = @movie.director
+    if not @director.blank?
+      @movies = Movie.similar_directors(@director)
+    else
+      flash[:notice] = "'#{@movie.title}' has no director info"
+      redirect_to movies_path
+    end
   end
 
 end
