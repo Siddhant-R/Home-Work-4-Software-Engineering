@@ -1,23 +1,14 @@
--# in app/views/movies/show.html.haml
+%h1 Create New Movie
 
-%h2 Details about #{@movie.title}
+= form_tag movies_path do
 
-%ul#details
-  %li
-    Rating:
-    = @movie.rating
-  %li
-    Released on:
-    = @movie.release_date.strftime("%B %d, %Y")
-  %li
-    Director:
-    = @movie.director
+  = label :movie, :title, 'Title'
+  = text_field :movie, 'title'
 
-%h3 Description:
+  = label :movie, :rating, 'Rating'
+  = select :movie, :rating, ['G','PG','PG-13','R','NC-17']
 
-%p#description= @movie.description
+  = label :movie, :release_date, 'Released On'
+  = date_select :movie, :release_date
 
-= link_to 'Edit', edit_movie_path(@movie)
-= button_to 'Delete', movie_path(@movie), :method => :delete, :confirm => 'Are you sure?'
-= link_to 'Find Movies With Same Director', movie_similar_path(@id)
-= link_to 'Back to movie list', movies_path
+  = submit_tag 'Save Changes'
